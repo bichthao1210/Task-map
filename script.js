@@ -4,16 +4,11 @@ var zoom = d3.behavior.zoom()
 .scaleExtent([1, 9])
 .on("zoom", move);
 
-
 var width = document.getElementById('container').offsetWidth;
 var height = width / 2;
-
 var topo,projection,path,svg,g;
-
 var graticule = d3.geo.graticule();
-
 var tooltip = d3.select("#container").append("div").attr("class", "tooltip hidden");
-
 setup(width,height);
 
 function setup(width,height){
@@ -114,7 +109,6 @@ function move() {
   //adjust the country hover stroke width based on zoom level
   d3.selectAll(".country").style("stroke-width", 1.5 / s);
 }
-
 
 var throttleTimer;
 function throttle() {
