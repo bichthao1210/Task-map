@@ -124,65 +124,6 @@
 //   }, 200);
 // }
 
-// //geo translation on mouse click in map
-// function click() {
-//   var latlon = projection.invert(d3.mouse(this));
-//   console.log(latlon);
-// }
-
-// //function to add points and text to the map (used in plotting capitals)
-// function addpoint(longitude, latitude, text) {
-
-//   var gpoint = g.append("g").attr("class", "gpoint");
-//   var x = projection([longitude, latitude])[0];
-//   var y = projection([longitude, latitude])[1];
-
-//   gpoint.append("svg:circle")
-//   .attr("cx", x)
-//   .attr("cy", y)
-//   .attr("class","point")
-//   .attr("r", 2)
-//   .style("fill", "#fff");
-
-//   //conditional in case a point has no associated text
-//   if(text.length>0){
-//     gpoint.append("text")
-//     .attr("x", x+2)
-//     .attr("y", y+2)
-//     .attr("class","text")
-//     .text(text)
-//     .style("fill", "#fff");
-//   }
-// }
-
-// var markers = [
-//   { name: "Marker 1", country: "Vietnam", latitude: 21.0285, longitude: 105.8542, image: "./img/vietnam.jpg" },
-//   { name: "Marker 2", country: "United States", latitude: 37.0902, longitude: -95.7129, image: "./img/My.jpg" },
-//   // Thêm các thông tin hình ảnh khác ở đây
-// ];
-
-// function addMarkers() {
-//   var gpoint = g.selectAll(".marker")
-//     .data(markers)
-//     .enter()
-//     .append("g")
-//     .attr("class", "marker")
-//     .attr("transform", function(d) { return "translate(" + projection([d.longitude, d.latitude]) + ")"; });
-
-//   gpoint.append("circle")
-//     .attr("r", 4)
-//     .style("fill", "red")
-//     .on("click", function(d) { showPopup(d); });
-
-//   // Xử lý sự kiện hiển thị popup khi click vào biểu tượng chấm tròn
-//   function showPopup(marker) {
-//     tooltip
-//       .classed("hidden", false)
-//       .style("left", d3.event.pageX + "px")
-//       .style("top", d3.event.pageY + "px")
-//       .html("<img src='" + marker.image + "'/><br>" + marker.name + "<br>" + marker.country);
-//   }
-
 //   // Ẩn popup khi click ra ngoài
 //   svg.on("click", function() {
 //     tooltip.classed("hidden", true);
@@ -199,7 +140,45 @@
 //   // Gọi hàm addMarkers() để vẽ các biểu tượng chấm tròn
 //   addMarkers();
 // });
-    
+
+// function addMarkers() {
+//   var gpoint = g.selectAll(".marker")
+//     .data(markers)
+//     .enter().append("g")
+//     .attr("class", "marker")
+//     .attr("transform", function(d) { return "translate(" + projection([d.longitude, d.latitude]) + ")"; });
+
+//   gpoint.append("circle")
+//     .attr("r", 4)
+//     .style("fill", "red")
+//     .on("click", function(d) { showPopup(d); })
+//     .attr("image", function(d) { return d.image; }) // Thêm thuộc tính image
+//     .attr("transform", "scale(" + 1 / zoom.scale() + ")"); // Thêm thuộc tính transform
+
+//   // Xử lý sự kiện hiển thị popup khi click vào biểu tượng chấm tròn
+//   function showPopup(marker) {
+//     tooltip.classed("hidden", false)
+//       .style("left", d3.event.pageX + "px")
+//       .style("top", d3.event.pageY + "px")
+//       .html('<img src="' + marker.image + '">' + marker.name + "<br>" + marker.country);
+//   }
+
+//   // Ẩn popup khi click ra ngoài
+//   svg.on("click", function() {
+//     tooltip.classed("hidden", true);
+//   });
+// }
+
+//   d3.json("https://api.github.com/gists/9398333", function(error, root) {
+//     var world = root.files['world.json'].content;
+//     world = JSON.parse(world);
+//     var countries = topojson.feature(world, world.objects.countries).features;
+//     topo = countries;
+//     draw(topo);
+  
+//     // Gọi hàm addMarkers() để vẽ các biểu tượng chấm tròn
+//     addMarkers();
+//   });
 var map = L.map('map').setView([51.505, -0.09], 4);
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -218,7 +197,3 @@ var addresses = [
   { lat: 50.7, lng: -3.0, address: '789 QWE Avenue' }
 ];
 
-addresses.forEach(function(address) {
-  var marker = L.marker([address.lat, address.lng], { icon: addressIcon }).addTo(map);
-  marker.bindPopup('<b>Địa chỉ:</b> ' + address.address);
-});
