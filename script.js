@@ -1,199 +1,159 @@
-// d3.select(window).on("resize", throttle);
+// var club = {lat: 14.0583, lng: 108.2772};
+// var mapOptions = {
+//   zoom: 4,
+//   center: club,
+//   disableDefaultUI: true
+// };
 
-// var zoom = d3.behavior.zoom()
-// .scaleExtent([1, 9])
-// .on("zoom", move);
+// var map = new google.maps.Map(
+//   document.getElementById('map-canvas'), 
+//   mapOptions
+// );
 
+// var locations = [
+//   {lat: 10.762622, lng: 106.660172, content: 'Thông tin 1', image: './img/vietnam.jpg'},
+//   {lat: 21.028511, lng: 105.804817, content: 'Thông tin 2'},
+//   {lat: 12.238791, lng: 109.196749, content: 'Thông tin 3'}
+// ];
 
-// var width = document.getElementById('container').offsetWidth;
-// var height = width / 2;
+// var markers = []; 
+// var currentInfoWindow = null;
 
-// var topo,projection,path,svg,g;
-
-// var graticule = d3.geo.graticule();
-
-// var tooltip = d3.select("#container").append("div").attr("class", "tooltip hidden");
-
-// setup(width,height);
-
-// function setup(width,height){
-//     projection = d3.geo.mercator()
-//     .translate([(width/2), (height/2)])
-//     .scale( width / 2 / Math.PI);
-
-//     path = d3.geo.path().projection(projection);
-
-//     svg = d3.select("#container").append("svg")
-//     .attr("width", width)
-//     .attr("height", height + 8)
-//     .call(zoom)
-//     .on("click", click)
-//     .append("g");
-
-//     g = svg.append("g");
-// }
-
-// d3.json("https://api.github.com/gists/9398333", function(error, root) {
-//     var world = root.files['world.json'].content
-//     world = JSON.parse(world)
-//     var countries = topojson.feature(world, world.objects.countries).features;
-//     topo = countries;
-//     draw(topo);
-// });
-
-// function draw(topo) {
-//     var country = g.selectAll(".country").data(topo);
-
-//     country.enter().insert("path")
-//     .attr("class", "country")
-//     .attr("d", path)
-//     .attr("id", function(d,i) { return d.id; })
-//     .attr("title", function(d,i) { return d.properties.name; })
-//     .style("fill", function(d, i) { return "#5f6b7a";return d.properties.color; });
-
-//     //offsets for tooltips
-//     var offsetL = document.getElementById('container').offsetLeft+20;
-//     var offsetT = document.getElementById('container').offsetTop+10;
-
-//     //tooltips
-//     country
-//     .on("mousemove", function(d,i) {
-
-//         var mouse = d3.mouse(svg.node()).map( function(d) { return parseInt(d); } );
-
-//         tooltip.classed("hidden", false)
-//         .attr("style", "left:"+(mouse[0]+offsetL)+"px;top:"+(mouse[1]+offsetT)+"px")
-//         .html(d.properties.name);
-
-//     })
-//     .on("mouseout",  function(d,i) {
-//         tooltip.classed("hidden", true);
-//     }); 
-//     $.getJSON( "https://smart-ip.net/geoip-json?callback=?",
-//         function(data){
-//             console.log( data);
-//           addpoint(data.longitude, data.latitude, data.city);
-//           $("span.city").html(data.city);
-//         }
-//     );
-// }
-
-// function redraw() {
-//     width = document.getElementById('container').offsetWidth;
-//     height = width / 2;
-//     d3.select('svg').remove();
-//     setup(width,height);
-//     draw(topo);
-// }
-
-// function move() {
-//   var t = d3.event.translate;
-//   var s = d3.event.scale;
-//   zscale = s;
-//   var h = height / 4;
-
-//   t[0] = Math.min(
-//     (width / height) * (s - 1),
-//     Math.max(width * (1 - s), t[0])
-//   );
-
-//   t[1] = Math.min(
-//     h * (s - 1) + h * s,
-//     Math.max(height * (1 - s) - h * s, t[1])
-//   );
-
-//   zoom.translate(t);
-//   g.attr("transform", "translate(" + t + ")scale(" + s + ")");
-
-//   // Thay đổi kích thước chấm tròn dựa trên tỷ lệ zoom
-//   g.selectAll(".marker")
-//     .attr("transform", function(d) {
-//       return "translate(" + projection([d.longitude, d.latitude]) + ")scale(" + 1 / s + ")";
-//     });
-
-//   //adjust the country hover stroke width based on zoom level
-//   d3.selectAll(".country").style("stroke-width", 1.5 / s);
-// }
-
-
-// var throttleTimer;
-// function throttle() {
-//   window.clearTimeout(throttleTimer);
-//   throttleTimer = window.setTimeout(function() {
-//     redraw();
-//   }, 200);
-// }
-
-//   // Ẩn popup khi click ra ngoài
-//   svg.on("click", function() {
-//     tooltip.classed("hidden", true);
+// locations.forEach(function(location) {
+//   var marker = new google.maps.Marker({
+//     position: location,
+//     map: map,
 //   });
-// }
 
-// d3.json("https://api.github.com/gists/9398333", function(error, root) {
-//   var world = root.files['world.json'].content;
-//   world = JSON.parse(world);
-//   var countries = topojson.feature(world, world.objects.countries).features;
-//   topo = countries;
-//   draw(topo);
+//   var infoWindow = new google.maps.InfoWindow({
+//     content: '<div><img src="' + location.image + '" width="200" height="150"><p>' + location.content + '</p></div>'
+//   });
 
-//   // Gọi hàm addMarkers() để vẽ các biểu tượng chấm tròn
-//   addMarkers();
+//   marker.addListener('click', function() {
+//     if (currentInfoWindow) {
+//       currentInfoWindow.close();
+//     }
+//     infoWindow.open(map, marker);
+//     currentInfoWindow = infoWindow;
+//   });
+
+//   markers.push({ marker: marker, infoWindow: infoWindow });
 // });
 
-// function addMarkers() {
-//   var gpoint = g.selectAll(".marker")
-//     .data(markers)
-//     .enter().append("g")
-//     .attr("class", "marker")
-//     .attr("transform", function(d) { return "translate(" + projection([d.longitude, d.latitude]) + ")"; });
-
-//   gpoint.append("circle")
-//     .attr("r", 4)
-//     .style("fill", "red")
-//     .on("click", function(d) { showPopup(d); })
-//     .attr("image", function(d) { return d.image; }) // Thêm thuộc tính image
-//     .attr("transform", "scale(" + 1 / zoom.scale() + ")"); // Thêm thuộc tính transform
-
-//   // Xử lý sự kiện hiển thị popup khi click vào biểu tượng chấm tròn
-//   function showPopup(marker) {
-//     tooltip.classed("hidden", false)
-//       .style("left", d3.event.pageX + "px")
-//       .style("top", d3.event.pageY + "px")
-//       .html('<img src="' + marker.image + '">' + marker.name + "<br>" + marker.country);
+// google.maps.event.addListener(map, 'click', function() {
+//   if (currentInfoWindow) {
+//     currentInfoWindow.close();
+//     currentInfoWindow = null;
 //   }
+// });
 
-//   // Ẩn popup khi click ra ngoài
-//   svg.on("click", function() {
-//     tooltip.classed("hidden", true);
-//   });
+// // Xử lý sự kiện input trên trường input
+// document.getElementById('search-input').addEventListener('input', function() {
+//   var searchValue = this.value.trim(); // Lấy giá trị và loại bỏ khoảng trắng ở đầu và cuối
+
+//   // Kiểm tra giá trị của trường tìm kiếm để hiển thị/ẩn nút X
+//   if (searchValue.length > 0) {
+//     showClearButton();
+//   } else {
+//     hideClearButton();
+//   }
+// });
+
+// // Hàm xóa tìm kiếm
+// function clearSearch() {
+//   document.getElementById('search-input').value = '';
+//   hideClearButton();
+//   document.getElementById('search-input').focus();
 // }
 
-//   d3.json("https://api.github.com/gists/9398333", function(error, root) {
-//     var world = root.files['world.json'].content;
-//     world = JSON.parse(world);
-//     var countries = topojson.feature(world, world.objects.countries).features;
-//     topo = countries;
-//     draw(topo);
-  
-//     // Gọi hàm addMarkers() để vẽ các biểu tượng chấm tròn
-//     addMarkers();
+// // Hiển thị nút X
+// function showClearButton() {
+//   document.getElementById('clear-button').style.display = 'block';
+// }
+
+// // Ẩn nút X
+// function hideClearButton() {
+//   document.getElementById('clear-button').style.display = 'none';
+// }
+
+// // Xử lý sự kiện keydown trên trường input
+// document.getElementById('search-input').addEventListener('keydown', function(event) {
+//   if (event.key === 'Enter') {
+//     event.preventDefault();
+//     performSearch();
+//   }
+// });
+
+// // Xử lý sự kiện click của nút tìm kiếm
+// document.getElementById('search-button').addEventListener('click', function(event) {
+//   event.preventDefault();
+//   performSearch();
+// });
+
+// // Hàm thực hiện tìm kiếm
+// function performSearch() {
+//   var searchInput = document.getElementById('search-input').value.toLowerCase();
+
+//   // Tìm kiếm đối tượng dựa trên nội dung
+//   var foundLocations = locations.filter(function(location) {
+//     var lowercaseContent = location.content.toLowerCase();
+
+//     // Tách các từ trong chuỗi tìm kiếm
+//     var searchKeywords = searchInput.split(' ');
+
+//     // Kiểm tra xem tất cả các từ khóa có xuất hiện trong nội dung thông tin hay không
+//     return searchKeywords.every(function(keyword) {
+//       return lowercaseContent.includes(keyword);
+//     });
 //   });
-var map = L.map('map').setView([51.505, -0.09], 4);
 
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-}).addTo(map);
+//   if (foundLocations.length > 0) {
+//     // Zoom đến các vị trí tìm kiếm với animation mượt hơn
+//     foundLocations.forEach(function(foundLocation) {
+//       map.setZoom(10);
+//       map.panTo(foundLocation);
+//     });
+//   }
+// }
 
-var addressIcon = L.icon({
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  iconSize: [15, 25],
-  iconAnchor: [12, 41],
-  popupAnchor: [-4, -40],
-});
-var addresses = [
-  { lat: 51.5, lng: -0.1, address: '123 ABC Street' },
-  { lat: 52.0, lng: -1.5, address: '456 XYZ Road' },
-  { lat: 50.7, lng: -3.0, address: '789 QWE Avenue' }
-];
+// // Sử dụng Autocomplete của jQuery UI để hiển thị gợi ý tìm kiếm
+// $(function() {
+//   var availableTags = locations.map(function(location) {
+//     return location.content;
+//   });
 
+//   $('#search-input').autocomplete({
+//     source: availableTags,
+//     select: function(event, ui) {
+//       var selectedValue = ui.item.value;
+//       $('#search-input').val(selectedValue);
+//       performSearch();
+//       return false;
+//     }
+//   })
+//   .autocomplete('instance')._renderItem = function(ul, item) {
+//     var currentValue = this.term.toLowerCase();
+//     var label = '';
+//     for (var i = 0; i < item.label.length; i++) {
+//       if (item.label[i].toLowerCase() === currentValue[i]) {
+//         label += '<span class="highlight">' + item.label[i] + '</span>';
+//       } else {
+//         label += item.label[i];
+//       }
+//     }
+//     return $('<li>')
+//       .append('<div>' + label + '</div>')
+//       .appendTo(ul);
+//   };
+// });
+
+var club = {lat: 22.284878, lng: 114.21435};
+var mapOptions = {
+    zoom: 4,
+    center: club,
+    disableDefaultUI: true
+  };
+var map = new google.maps.Map(
+  document.getElementById('map-canvas'), 
+  mapOptions
+);  
