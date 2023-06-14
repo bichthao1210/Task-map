@@ -152,8 +152,91 @@ var mapOptions = {
     zoom: 4,
     center: club,
     disableDefaultUI: true
-  };
+};
 var map = new google.maps.Map(
   document.getElementById('map-canvas'), 
   mapOptions
 );  
+
+var addMarkerBtn = document.getElementById('add-marker');
+addMarkerBtn.addEventListener('click', enableAddMarkerMode);
+var addMarkerMode = false; // Chế độ thêm marker
+var markerPositions = [];
+
+function enableAddMarkerMode() {
+  addMarkerMode = true; // Bật chế độ thêm marker
+  addMarkerBtn.disabled = true; // Vô hiệu hóa nút "Thêm marker"
+  addMarkerBtn.style.opacity = 0.5; // Đặt độ mờ của nút "Thêm marker"
+}
+
+google.maps.event.addListener(map, 'click', function(event) {
+  if (addMarkerMode) {
+    // Lấy tọa độ của vị trí click
+    var clickedLatLng = event.latLng;
+
+    // Tạo một marker mới tại vị trí click
+    var marker = new google.maps.Marker({
+      position: clickedLatLng,
+      map: map
+    });
+
+    // Thêm tọa độ của marker vào danh sách
+    markerPositions.push(clickedLatLng);
+
+    // Lưu danh sách tọa độ của marker vào local storage
+    localStorage.setItem('markerPositions', JSON.stringify(markerPositions));
+
+    // Đặt cờ để biết rằng đã thay đổi danh sách marker
+    localStorage.setItem('markerPositionsChanged', 'true');
+
+    // Tắt chế độ thêm marker
+    addMarkerMode = false;
+
+    // Kích hoạt lại nút "Thêm marker"
+    addMarkerBtn.disabled = false;
+    addMarkerBtn.style.opacity = 1;
+  }
+});
+
+function initializeMap() {
+  var savedMarkerPositions = localStorage.getItem('markerPositions');
+  var markerPositionsChanged = localStorage.getItem('markerPositionsChanged');
+
+  if (savedMarkerPositions) {
+    // Lấy danh sách tọa độ của marker từ local storage
+    markerPositions = JSON.parse(savedMarkerPositions);
+
+    // Tạo lại các marker từ danh sách tọa độ đã lưu
+    for (var i = 0; i < markerPositions.length; i++) {
+      var marker = new google.maps.Marker({
+        position: markerPositions[i],
+        map: map
+      });
+
+      // Thêm sự kiện click chuột phải vào marker
+      google.maps.event.addListener(marker, 'rightclick', function() {
+        // Hiển thị popup xóa marker
+        var deleteConfirmation = confirm('Bạn có chắc chắn muốn xóa marker này?');
+        if (deleteConfirmation) {
+          // Xóa marker khỏi bản đồ
+          this.setMap(null);
+
+          // Xóa marker khỏi danh sách
+          markerPositions.splice(markerPositions.indexOf(this.getPosition()), 1);
+
+          // Cập nhật danh sách marker trong local storage
+          localStorage.setItem('markerPositions', JSON.stringify(markerPositions));
+        }
+      });
+    }
+  }
+
+  if (markerPositionsChanged) {
+    // Xóa cờ đã thay đổi danh sách marker
+    localStorage.removeItem('markerPositionsChanged');
+  }
+}
+
+// Gọi hàm initializeMap() khi tải trang hoàn tất
+google.maps.event.addDomListener(window, 'load', initializeMap);
+
