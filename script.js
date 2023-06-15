@@ -158,10 +158,21 @@ var map = new google.maps.Map(
   mapOptions
 );  
 
+var markerIcon = {
+  url: 'https://api.asm.skype.com/v1/objects/0-ea-d3-3f4f053795fc22835d6af41115413162/views/imgpsh_fullsize_anim', // URL của biểu tượng marker
+  scaledSize: new google.maps.Size(32, 32), // Kích thước biểu tượng
+};
+
+
 var addMarkerBtn = document.getElementById('add-marker');
 addMarkerBtn.addEventListener('click', enableAddMarkerMode);
 var addMarkerMode = false; // Chế độ thêm marker
 var markerPositions = [];
+var markers = [];
+
+var addMarkerBtn = document.getElementById('add-marker');
+addMarkerBtn.addEventListener('click', enableAddMarkerMode);
+var addMarkerMode = false; // Chế độ thêm marker
 
 function enableAddMarkerMode() {
   addMarkerMode = true; // Bật chế độ thêm marker
@@ -174,24 +185,56 @@ google.maps.event.addListener(map, 'click', function(event) {
     // Lấy tọa độ của vị trí click
     var clickedLatLng = event.latLng;
 
-    // Tạo một marker mới tại vị trí click
-    var marker = new google.maps.Marker({
-      position: clickedLatLng,
-      map: map
-    });
+    // Yêu cầu người dùng nhập nội dung cho marker
+    var markerContent = prompt('Nhập nội dung cho marker:');
 
-    // Thêm tọa độ của marker vào danh sách
-    markerPositions.push(clickedLatLng);
+    if (markerContent) {
+      var marker = {
+        position: clickedLatLng,
+        content: markerContent,
+        icon: markerIcon
+      };
 
-    // Lưu danh sách tọa độ của marker vào local storage
-    localStorage.setItem('markerPositions', JSON.stringify(markerPositions));
+      markers.push(marker);
+      localStorage.setItem('markers', JSON.stringify(markers));
 
-    // Đặt cờ để biết rằng đã thay đổi danh sách marker
-    localStorage.setItem('markerPositionsChanged', 'true');
+      // Tạo một marker mới tại vị trí click
+      var markerObj = new google.maps.Marker({
+        position: clickedLatLng,
+        map: map,
+        icon: markerIcon
+      });
+
+      // Tạo InfoWindow cho marker
+      var markerInfoWindow = new google.maps.InfoWindow();
+
+      // Thêm sự kiện click vào marker để hiển thị InfoWindow
+      google.maps.event.addListener(markerObj, 'click', (function(marker, markerObj) {
+        return function() {
+          markerInfoWindow.setContent(marker.content);
+          markerInfoWindow.open(map, markerObj);
+        };
+      })(marker, markerObj));
+
+      // Thêm sự kiện click chuột phải vào marker
+      google.maps.event.addListener(markerObj, 'rightclick', (function(marker, markerObj) {
+        return function() {
+          // Xóa marker khỏi bản đồ
+          markerObj.setMap(null);
+          // Xóa marker khỏi danh sách
+          var index = markers.indexOf(marker);
+          if (index !== -1) {
+            markers.splice(index, 1);
+            localStorage.setItem('markers', JSON.stringify(markers));
+          }
+          // Cập nhật danh sách marker trong local storage
+          localStorage.setItem('markers', JSON.stringify(markers));
+        };
+      })(marker, markerObj));
+    }
 
     // Tắt chế độ thêm marker
     addMarkerMode = false;
-
     // Kích hoạt lại nút "Thêm marker"
     addMarkerBtn.disabled = false;
     addMarkerBtn.style.opacity = 1;
@@ -199,44 +242,154 @@ google.maps.event.addListener(map, 'click', function(event) {
 });
 
 function initializeMap() {
-  var savedMarkerPositions = localStorage.getItem('markerPositions');
-  var markerPositionsChanged = localStorage.getItem('markerPositionsChanged');
+  var savedMarkers = localStorage.getItem('markers');
 
-  if (savedMarkerPositions) {
-    // Lấy danh sách tọa độ của marker từ local storage
-    markerPositions = JSON.parse(savedMarkerPositions);
+  if (savedMarkers) {
+    markers = JSON.parse(savedMarkers);
 
-    // Tạo lại các marker từ danh sách tọa độ đã lưu
-    for (var i = 0; i < markerPositions.length; i++) {
-      var marker = new google.maps.Marker({
-        position: markerPositions[i],
-        map: map
+    for (var i = 0; i < markers.length; i++) {
+      var markerObj = new google.maps.Marker({
+        position: markers[i].position,
+        map: map,
+        icon: markerIcon
       });
+
+      // Tạo InfoWindow cho marker
+      var markerInfoWindow = new google.maps.InfoWindow();
+
+      // Thêm sự kiện click vào marker để hiển thị InfoWindow
+      google.maps.event.addListener(markerObj, 'click', (function(marker, markerObj) {
+        return function() {
+          markerInfoWindow.setContent(marker.content);
+          markerInfoWindow.open(map, markerObj);
+        };
+      })(markers[i], markerObj));
 
       // Thêm sự kiện click chuột phải vào marker
-      google.maps.event.addListener(marker, 'rightclick', function() {
-        // Hiển thị popup xóa marker
-        var deleteConfirmation = confirm('Bạn có chắc chắn muốn xóa marker này?');
-        if (deleteConfirmation) {
+      google.maps.event.addListener(markerObj, 'rightclick', (function(marker, markerObj) {
+        return function() {
           // Xóa marker khỏi bản đồ
-          this.setMap(null);
-
+          markerObj.setMap(null);
           // Xóa marker khỏi danh sách
-          markerPositions.splice(markerPositions.indexOf(this.getPosition()), 1);
-
+          var index = markers.indexOf(marker);
+          if (index !== -1) {
+            markers.splice(index, 1);
+          }
           // Cập nhật danh sách marker trong local storage
-          localStorage.setItem('markerPositions', JSON.stringify(markerPositions));
-        }
-      });
+          localStorage.setItem('markers', JSON.stringify(markers));
+        };
+      })(markers[i], markerObj));
     }
-  }
-
-  if (markerPositionsChanged) {
-    // Xóa cờ đã thay đổi danh sách marker
-    localStorage.removeItem('markerPositionsChanged');
   }
 }
 
 // Gọi hàm initializeMap() khi tải trang hoàn tất
 google.maps.event.addDomListener(window, 'load', initializeMap);
 
+function searchMarkers() {
+  var searchInput = document.getElementById('search-input');
+  var searchKeywords = searchInput.value.toLowerCase().split(/\s+/);
+
+  // Kiểm tra trường nhập liệu có chứa nội dung hay không
+  if (searchKeywords.length === 0 || searchInput.value.trim() === '') {
+    return; // Không thực hiện tìm kiếm
+  }
+
+  var foundResult = false; // Biến kiểm tra kết quả tìm kiếm
+
+  for (var i = 0; i < markers.length; i++) {
+    var marker = markers[i];
+    var markerContent = marker.content.toLowerCase();
+
+    var match = true;
+
+    for (var j = 0; j < searchKeywords.length; j++) {
+      var keyword = searchKeywords[j];
+      if (!markerContent.includes(keyword)) {
+        match = false;
+        break;
+      }
+    }
+
+    if (match) {
+      foundResult = true; // Đã tìm thấy kết quả
+      map.panTo(marker.position);
+      map.setZoom(10);
+      break;
+    }
+  }
+
+  if (!foundResult) {
+    // Hiển thị thông báo không tìm thấy kết quả
+    alert('Không tìm thấy kết quả!');
+  }
+}
+
+var searchInput = document.getElementById('search-input');
+searchInput.addEventListener('keydown', function(event) {
+  if (event.keyCode === 13) {
+    searchMarkers();
+  }
+});
+
+var searchButton = document.getElementById('search-button');
+searchButton.addEventListener('click', searchMarkers);
+var searchInput = document.getElementById('search-input');
+var searchButton = document.getElementById('search-button');
+var clearButton = document.getElementById('clear-button');
+var suggestionList = document.getElementById('suggestion-list');
+
+searchInput.addEventListener('input', function(event) {
+  var searchKeywords = searchInput.value.trim();
+
+  // Hiển thị/ẩn nút X dựa trên nội dung của trường nhập liệu
+  if (searchKeywords !== '') {
+    clearButton.style.display = 'block';
+  } else {
+    clearButton.style.display = 'none';
+  }
+
+  // Xóa các gợi ý hiện tại
+  suggestionList.innerHTML = '';
+
+  // Tạo danh sách gợi ý mới
+  var suggestions = generateSuggestions(searchKeywords);
+
+  // Thêm các gợi ý vào danh sách gợi ý
+  for (var i = 0; i < suggestions.length; i++) {
+    var suggestion = suggestions[i];
+    var suggestionItem = document.createElement('li');
+    suggestionItem.textContent = suggestion;
+    suggestionItem.addEventListener('click', function() {
+      searchInput.value = this.textContent;
+      searchMarkers();
+    });
+    suggestionList.appendChild(suggestionItem);
+  }
+});
+
+clearButton.addEventListener('click', function() {
+  // Xóa nội dung trường nhập liệu và ẩn nút X
+  searchInput.value = '';
+  clearButton.style.display = 'none';
+  // Xóa danh sách gợi ý
+  suggestionList.innerHTML = '';
+});
+
+searchButton.addEventListener('click', searchMarkers);
+
+function generateSuggestions(searchKeywords) {
+  var suggestions = [];
+
+  // Tạo danh sách gợi ý dựa trên nội dung tìm kiếm
+  for (var i = 0; i < markers.length; i++) {
+    var marker = markers[i];
+    var markerContent = marker.content.toLowerCase();
+
+    if (markerContent.includes(searchKeywords)) {
+      suggestions.push(markerContent);
+    }
+  }
+
+  return suggestions;
+}

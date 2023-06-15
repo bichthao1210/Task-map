@@ -69,7 +69,16 @@ body {
   position: absolute;
   bottom: 170px;
   right: 20px;
-  
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: #fff;
+  border-radius: 2px;
+}
+
+#add-marker i {
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .marker-menu {
@@ -99,7 +108,6 @@ body {
   background-color: #f5f5f5;
 }
 
-
 .ui-autocomplete {
   max-height: auto;
   width: 21px;
@@ -115,6 +123,38 @@ body {
 .ui-autocomplete .highlight {
   font-weight: bold;
 }
+
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+}
+
+.popup-content {
+  text-align: center;
+}
+
+.popup-content label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.popup-content input {
+  width: 200px;
+  padding: 5px;
+  margin-bottom: 10px;
+}
+
+.popup-content button {
+  padding: 5px 10px;
+}
+
 
 @media only screen and (orientation: landscape) {
   .cell {
